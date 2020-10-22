@@ -13,5 +13,7 @@
             "fengkui\\": "src"
         }
     },
-    "require": {}
+    "require": {
+        "fengkui/supports": "*"
+    }
 }
