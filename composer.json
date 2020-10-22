@@ -9,9 +9,9 @@
     ],
     "require": {},
     "autoload": {
-	    "psr-4": {
-	        "fengkui\\Xcx\\": "src"
-	    }
-	},
-	"license": "MIT"
+        "psr-4": {
+            "fengkui\\Xcx\\": "src"
+        }
+    },
+    "license": "MIT"
 }
