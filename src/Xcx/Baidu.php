@@ -3,12 +3,12 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-10-15T11:14:40+08:00
+ * @Last Modified time: 2020-10-22T14:56:05+08:00
  */
 namespace fengkui\Xcx;
 
 use Exception;
-use feng\Common\Http;
+use GuzzleHttp\Client;
 
 /**
  * 百度小程序
