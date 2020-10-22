@@ -8,12 +8,12 @@
             "email": "1161634940@qq.com"
         }
     ],
+    "require": {
+        "fengkui/supports": "*"
+    },
     "autoload": {
         "psr-4": {
             "fengkui\\": "src"
         }
-    },
-    "require": {
-        "fengkui/supports": "*"
     }
 }
