@@ -5,7 +5,7 @@
  * @Last Modified by:   [FENG] <1161634940@qq.com>
  * @Last Modified time: 2020-10-21T18:18:23+08:00
  */
-namespace feng\Xcx;
+namespace fengkui\Xcx;
 
 use Exception;
 use feng\Common\Http;

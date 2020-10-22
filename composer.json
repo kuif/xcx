@@ -1,5 +1,6 @@
 {
     "name": "fengkui/xcx",
+    "type": "library",
     "description": "小程序的相关信息获取与使用",
     "license": "MIT",
     "authors": [
@@ -10,7 +11,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "fengkui\\Xcx\\": "src"
+            "fengkui\\Xcx\\": "src/"
         }
     },
     "require": {}
