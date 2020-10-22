@@ -1,0 +1,17 @@
+{
+    "name": "fengkui/xcx",
+    "description": "小程序相关信息获取与使用",
+    "authors": [
+        {
+            "name": "fengkui",
+            "email": "1161634940@qq.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+	    "psr-4": {
+	        "fengkui\\Xcx\\": "src"
+	    }
+	},
+	"license": "MIT"
+}
