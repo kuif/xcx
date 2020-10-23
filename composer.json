@@ -10,7 +10,7 @@
     ],
     "require": {
         "fengkui/supports": "*"
-    },
+    }, 
     "autoload": {
         "psr-4": {
             "fengkui\\": "src"

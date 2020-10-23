@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-10-22T17:09:55+08:00
+ * @Last Modified time: 2020-10-22 18:28:29
  */
 namespace fengkui\Xcx;
 
@@ -29,11 +29,6 @@ class Wechat
      */
     public function __construct($config=NULL){
         $config && self::$config = $config;
-    }
-
-    public static function ceshi()
-    {
-        return self::$config;
     }
 
     /**
