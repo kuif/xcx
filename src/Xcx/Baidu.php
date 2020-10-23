@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-10-22T17:10:08+08:00
+ * @Last Modified time: 2020-10-23T11:24:42+08:00
  */
 namespace fengkui\Xcx;
 
@@ -39,13 +39,13 @@ class Baidu
      */
     public static function openid($code)
     {
-        $options = [
+        $params = [
             'client_id' => self::$config['appkey'],
             'sk'        => self::$config['secret'],
             'code'      => $code,
         ];
 
-        $response = Http::get(self::$jscode2session, $options);
+        $response = Http::get(self::$jscode2session, $params);
         $result = json_decode($response, true);
         return $result;
     }
@@ -56,14 +56,14 @@ class Baidu
      */
     public static function accessToken()
     {
-        $options = [
+        $params = [
             'client_id' => self::$config['appkey'],
             'client_secret' => self::$config['secret'],
             'grant_type' => 'client_credentials',
             'scop' => 'smartapp_snsapi_base'
         ];
 
-        $response = Http::get(self::$token, $options);
+        $response = Http::get(self::$token, $params);
         $result = json_decode($response, true);
         return $result;
     }

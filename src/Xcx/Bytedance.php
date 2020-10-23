@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-10-22T17:10:04+08:00
+ * @Last Modified time: 2020-10-23T14:21:09+08:00
  */
 namespace fengkui\Xcx;
 
@@ -17,6 +17,7 @@ class Bytedance
 {
     private static $jscode2session = 'https://developer.toutiao.com/api/apps/jscode2session';
     private static $token = 'https://developer.toutiao.com/api/apps/token';
+    private static $antidirt = 'https://developer.toutiao.com/api/v2/tags/text/antidirt';
 
     private static $config = array(
         'appid' => '', // appid
@@ -38,13 +39,13 @@ class Bytedance
      */
     public static function openid($code)
     {
-        $options = [
+        $params = [
             'code'  => $code,
             'appid' => self::$config['appid'],
             'secret' => self::$config['secret'],
         ];
 
-        $response = Http::get(self::$jscode2session, $options);
+        $response = Http::get(self::$jscode2session, $params);
         $result = json_decode($response, true);
         return $result;
     }
@@ -55,13 +56,13 @@ class Bytedance
      */
     public static function accessToken()
     {
-        $options = [
+        $params = [
             'grant_type' => 'client_credential',
             'appid'     => self::$config['appid'],
             'secret'    => self::$config['secret'],
         ];
 
-        $response = Http::get(self::$token, $options);
+        $response = Http::get(self::$token, $params);
         $result = json_decode($response, true);
         return $result;
     }
@@ -92,6 +93,31 @@ class Bytedance
             throw new Exception("[41003] Encrypted data is empty");
 
         return $result;
+    }
+
+    /**
+     * [antidirt 检测文本是否包含违规内容]
+     * @param  string $text [待检测的文本]
+     * @return [type]       [description]
+     */
+    public static function antidirt($text='')
+    {
+        if (!$text)
+            throw new Exception("[$text] Filter word is empty");
+
+        $result = self::accessToken();
+        $access_token = $result['access_token'];
+        $params = '{"tasks": [{"content": "'.$text.'"}]}';
+
+        $response = Http::post(self::$antidirtUrl, $params, ['X-Token: '.$access_token]);
+        $result = json_decode($response, true);
+
+        if ($result['data'][0]['predicts'][0]['hit']) {
+            // die('包含违规内容，请更换');
+            return true;
+        } else {
+            return true;
+        }
     }
 
 }

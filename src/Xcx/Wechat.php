@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-10-22 18:28:29
+ * @Last Modified time: 2020-10-23T11:24:08+08:00
  */
 namespace fengkui\Xcx;
 
@@ -38,14 +38,14 @@ class Wechat
      */
     public static function openid($code)
     {
-        $options = [
+        $params = [
             'js_code'   => $code,
             'appid'     => self::$config['appid'],
             'secret'    => self::$config['secret'],
             'grant_type' => 'authorization_code'
         ];
 
-        $response = Http::get(self::$jscode2session, $options);
+        $response = Http::get(self::$jscode2session, $params);
         $result = json_decode($response, true);
         return $result;
     }
@@ -56,13 +56,13 @@ class Wechat
      */
     public static function accessToken()
     {
-        $options = [
+        $params = [
             'grant_type' => 'client_credential',
             'appid'     => self::$config['appid'],
             'secret'    => self::$config['secret'],
         ];
 
-        $response = Http::get(self::$token, $options);
+        $response = Http::get(self::$token, $params);
         $result = json_decode($response, true);
         return $result;
     }
