@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-10-23T11:24:08+08:00
+ * @Last Modified time: 2020-10-29 17:48:29
  */
 namespace fengkui\Xcx;
 
@@ -92,7 +92,7 @@ class Wechat
         if(!$dataObj) // -41003（数据为空）
             throw new Exception("[41003] Encrypted data is empty");
 
-        if( $dataObj->watermark->appid != $appid ) // -41003（appid不匹配）
+        if($dataObj['watermark']['appid'] != $appid) // -41003（appid不匹配）
             throw new Exception("[41003] Appid does not match");
 
         return $result;
