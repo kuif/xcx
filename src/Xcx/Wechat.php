@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-10-29 17:48:29
+ * @Last Modified time: 2020-10-31T12:42:17+08:00
  */
 namespace fengkui\Xcx;
 
@@ -15,8 +15,8 @@ use fengkui\Supports\Http;
  */
 class Wechat
 {
-    private static $jscode2session = 'https://api.weixin.qq.com/sns/jscode2session';
-    private static $token = 'https://api.weixin.qq.com/cgi-bin/token';
+    private static $jscode2sessionUrl = 'https://api.weixin.qq.com/sns/jscode2session';
+    private static $tokenUrl = 'https://api.weixin.qq.com/cgi-bin/token';
 
     private static $config = array(
         'appid' => '', // appid
@@ -45,7 +45,7 @@ class Wechat
             'grant_type' => 'authorization_code'
         ];
 
-        $response = Http::get(self::$jscode2session, $params);
+        $response = Http::get(self::$jscode2sessionUrl, $params);
         $result = json_decode($response, true);
         return $result;
     }
@@ -62,7 +62,7 @@ class Wechat
             'secret'    => self::$config['secret'],
         ];
 
-        $response = Http::get(self::$token, $params);
+        $response = Http::get(self::$tokenUrl, $params);
         $result = json_decode($response, true);
         return $result;
     }

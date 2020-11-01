@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-10-29 17:11:30
+ * @Last Modified time: 2020-10-31T12:42:40+08:00
  */
 namespace fengkui\Xcx;
 
@@ -15,8 +15,8 @@ use fengkui\Supports\Http;
  */
 class Qq
 {
-    private static $jscode2session = 'https://api.q.qq.com/sns/jscode2session';
-    private static $token = 'https://api.q.qq.com/api/getToken';
+    private static $jscode2sessionUrl = 'https://api.q.qq.com/sns/jscode2session';
+    private static $tokenUrl = 'https://api.q.qq.com/api/getToken';
 
     private static $config = array(
         'appid' => '', // appid
@@ -45,7 +45,7 @@ class Qq
             'grant_type' => 'authorization_code'
         ];
 
-        $response = Http::get(self::$jscode2session, $params);
+        $response = Http::get(self::$jscode2sessionUrl, $params);
         $result = json_decode($response, true);
         return $result;
     }
@@ -62,7 +62,7 @@ class Qq
             'secret'    => self::$config['secret'],
         ];
 
-        $response = Http::get(self::$token, $params);
+        $response = Http::get(self::$tokenUrl, $params);
         $result = json_decode($response, true);
         return $result;
     }

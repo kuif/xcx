@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-10-23T14:21:09+08:00
+ * @Last Modified time: 2020-10-31T12:43:13+08:00
  */
 namespace fengkui\Xcx;
 
@@ -15,9 +15,9 @@ use fengkui\Supports\Http;
  */
 class Bytedance
 {
-    private static $jscode2session = 'https://developer.toutiao.com/api/apps/jscode2session';
-    private static $token = 'https://developer.toutiao.com/api/apps/token';
-    private static $antidirt = 'https://developer.toutiao.com/api/v2/tags/text/antidirt';
+    private static $jscode2sessionUrl = 'https://developer.toutiao.com/api/apps/jscode2session';
+    private static $tokenUrl = 'https://developer.toutiao.com/api/apps/token';
+    private static $antidirtUrl = 'https://developer.toutiao.com/api/v2/tags/text/antidirt';
 
     private static $config = array(
         'appid' => '', // appid
@@ -45,7 +45,7 @@ class Bytedance
             'secret' => self::$config['secret'],
         ];
 
-        $response = Http::get(self::$jscode2session, $params);
+        $response = Http::get(self::$jscode2sessionUrl, $params);
         $result = json_decode($response, true);
         return $result;
     }
@@ -62,7 +62,7 @@ class Bytedance
             'secret'    => self::$config['secret'],
         ];
 
-        $response = Http::get(self::$token, $params);
+        $response = Http::get(self::$tokenUrl, $params);
         $result = json_decode($response, true);
         return $result;
     }

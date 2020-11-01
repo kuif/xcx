@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-10-23T11:24:42+08:00
+ * @Last Modified time: 2020-10-31T12:45:04+08:00
  */
 namespace fengkui\Xcx;
 
@@ -15,8 +15,8 @@ use fengkui\Supports\Http;
  */
 class Baidu
 {
-    private static $jscode2session = 'https://spapi.baidu.com/oauth/jscode2sessionkey';
-    private static $token = 'https://openapi.baidu.com/oauth/2.0/token';
+    private static $jscode2sessionUrl = 'https://spapi.baidu.com/oauth/jscode2sessionkey';
+    private static $tokenUrl = 'https://openapi.baidu.com/oauth/2.0/token';
 
     private static $config = array(
         'appid' => '', // appid
@@ -45,7 +45,7 @@ class Baidu
             'code'      => $code,
         ];
 
-        $response = Http::get(self::$jscode2session, $params);
+        $response = Http::get(self::$jscode2sessionUrl, $params);
         $result = json_decode($response, true);
         return $result;
     }
@@ -63,7 +63,7 @@ class Baidu
             'scop' => 'smartapp_snsapi_base'
         ];
 
-        $response = Http::get(self::$token, $params);
+        $response = Http::get(self::$tokenUrl, $params);
         $result = json_decode($response, true);
         return $result;
     }
