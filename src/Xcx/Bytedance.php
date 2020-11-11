@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-10-31T12:43:13+08:00
+ * @Last Modified time: 2020-11-11 15:56:19
  */
 namespace fengkui\Xcx;
 
@@ -116,7 +116,7 @@ class Bytedance
             // die('包含违规内容，请更换');
             return true;
         } else {
-            return true;
+            return false;
         }
     }
 
