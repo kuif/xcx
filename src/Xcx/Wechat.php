@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-10-31T12:42:17+08:00
+ * @Last Modified time: 2020-12-01 13:28:45
  */
 namespace fengkui\Xcx;
 
@@ -17,6 +17,10 @@ class Wechat
 {
     private static $jscode2sessionUrl = 'https://api.weixin.qq.com/sns/jscode2session';
     private static $tokenUrl = 'https://api.weixin.qq.com/cgi-bin/token';
+    private static $sendUrl = 'https://api.weixin.qq.com/cgi-bin/message/subscribe/send';
+    private static $createwxaqrcode = 'https://api.weixin.qq.com/cgi-bin/wxaapp/createwxaqrcode';
+    private static $getwxacode = 'https://api.weixin.qq.com/wxa/getwxacode';
+    private static $getwxacodeunlimit = 'https://api.weixin.qq.com/wxa/getwxacodeunlimit';
 
     private static $config = array(
         'appid' => '', // appid
@@ -65,6 +69,86 @@ class Wechat
         $response = Http::get(self::$tokenUrl, $params);
         $result = json_decode($response, true);
         return $result;
+    }
+
+    /**
+     * [send 微信小程序发送订阅消息]
+     * @param  [type] $openid      [用户openid]
+     * @param  array  $data        [发送数据]
+     * @param  string $template_id [订阅消息模板ID]
+     * @param  string $page        [打开页面]
+     * @return [type]              [description]
+     */
+    public static function send($openid, $data=[], $template_id, $page='pages/index/index')
+    {
+        // $data = array('11111','222222',date('Y-m-d'));
+        foreach ($data as $k => $v) {
+            if (in_array($k, [0,1])) {
+                $key = 'thing';
+            } else {
+                $key = 'time';
+            }
+            $keyword[$key.($k+1)] = array('value'=>$v);
+        }
+
+        $access_token = self::accessToken();
+        $access_token = $access_token['access_token'];
+
+        $sendUrl = self::$sendUrl . "?access_token=" . $access_token;
+
+        $postData = array(
+            'access_token'  => $access_token,
+            'touser'        => $openid, // 用户openid
+            'template_id'   => $template_id, // 消息模板ID
+            'page'          => $page, // 小程序跳转页面
+            'data'          => $keyword, // 模板内容
+        );
+
+        $response = Http::post($sendUrl, json_encode($postData), ['Content-Type: application/json']);
+        $result = json_decode($response, true);
+        return $result;
+    }
+
+    /**
+     * [qrcode 获取小程序二维码]
+     * @param  [type]  $path  [小程序页面路径]
+     * @param  integer $width [小程序码宽度 px (默认430)]
+     * @param  integer $type  [获取类型 1:createwxaqrcode 2:getwxacode 3:getwxacodeunlimit  (默认2)]
+     * @return [type]         [description]
+     */
+    public function qrcode($path, $width = 430, $type=2)
+    {
+    	$access_token = self::accessToken();
+    	$access_token = $access_token['access_token'];
+
+    	$params = array(
+    		'access_token' => $access_token,
+    		'path' => $path, // 扫码进入的小程序页面路径
+    		'width' => $width, // 二维码的宽度，单位 px。
+    	);
+
+    	$postUrl = self::$createwxaqrcode . "?access_token=" . $access_token;
+
+    	if ($type == 2) {
+    		$postUrl = self::$getwxacode . "?access_token=" . $access_token;
+
+    		$params['auto_color'] = false; // 自动配置线条颜色
+    		$params['is_hyaline'] = true; // 是否需要透明底色
+    	}
+    	if ($type == 3) {
+    		$postUrl = self::$getwxacodeunlimit . "?access_token=" . $access_token;
+
+    		unset($params['path']);
+
+    		$params['scene'] = ''; // 扫码进入的小程序携带参数
+    		$params['page'] = $path; // 扫码进入的小程序页面路径
+
+    		$params['auto_color'] = false; // 自动配置线条颜色
+    		$params['is_hyaline'] = true; // 是否需要透明底色
+    	}
+
+    	$response = Http::post($postUrl, json_encode($postData), ['Content-Type: application/json']);
+    	return $result;
     }
 
     /**
