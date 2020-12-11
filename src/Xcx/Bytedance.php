@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-11-11 15:56:19
+ * @Last Modified time: 2020-12-11T15:37:19+08:00
  */
 namespace fengkui\Xcx;
 
@@ -15,13 +15,19 @@ use fengkui\Supports\Http;
  */
 class Bytedance
 {
+    // 通过服务器发送请求的方式获取 session_key 和 openId
     private static $jscode2sessionUrl = 'https://developer.toutiao.com/api/apps/jscode2session';
+    // 获取 access_token
     private static $tokenUrl = 'https://developer.toutiao.com/api/apps/token';
+    // 内容安全检测
     private static $antidirtUrl = 'https://developer.toutiao.com/api/v2/tags/text/antidirt';
+    // 获取二维码
+    private static $qrcodeUrl = 'https://developer.toutiao.com/api/apps/qrcode';
 
     private static $config = array(
         'appid' => '', // appid
         'secret' => '', // secret
+        'access_token' => '', // access_token
     );
 
     /**
@@ -65,6 +71,44 @@ class Bytedance
         $response = Http::get(self::$tokenUrl, $params);
         $result = json_decode($response, true);
         return $result;
+    }
+
+    /**
+     * [qrcode 获取小程序二维码，图片 Buffer]
+     * @param  [type]  $path  [小程序页面路径]
+     * @param  integer $width [小程序码宽度 px (默认430)]
+     * @param  integer $type  [获取类型 1:今日头条 2:抖音 3:皮皮虾 4:火山小视频  (默认1)]
+     * @param  boolean $icon  [是否包含logo 默认包含]
+     * @return [type]         [description]
+     */
+    public function qrcode($path, $width = 430, $type=1, $icon=true)
+    {
+        if (empty(self::$config['access_token'])) {
+            $access_token = self::accessToken();
+            $access_token = $access_token['access_token'];
+        } else {
+            $access_token = self::$config['access_token'];
+        }
+        $appname = array( 1 => 'toutiao', 2 => 'douyin', 3 => 'pipixia', 4 => 'huoshan' );
+
+    	$params = array(
+            'access_token'  => $access_token,
+            'appname'       => isset($appname[$type]) ? $appname[$type] : 'toutiao',
+            'path'          => $path, // 扫码进入的小程序页面路径
+            'width'         => $width, // 二维码的宽度，单位 px。
+            // 'line_color'    => '{"r":0,"g":0,"b":0}', // 自动配置线条颜色
+            // 'background'    => '', // 是否需要透明底色
+            'set_icon'      => $icon, //  是否展示小程序/小游戏 icon，默认不展示
+    	);
+    	$postUrl = self::$qrcodeUrl;
+
+    	$response = Http::post($postUrl, json_encode($params), array('Content-Type: application/json'));
+        $result = json_decode($response, true);
+        if (json_last_error() != JSON_ERROR_NONE) {
+            return $response;
+        } else {
+            throw new Exception("[" . $result['errcode'] . "] " . $result['errmsg']);
+        }
     }
 
     /**

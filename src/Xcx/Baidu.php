@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-10-31T12:45:04+08:00
+ * @Last Modified time: 2020-12-10T16:27:48+08:00
  */
 namespace fengkui\Xcx;
 
@@ -15,13 +15,20 @@ use fengkui\Supports\Http;
  */
 class Baidu
 {
+    // 获取 Session Key 的 URL 地址
     private static $jscode2sessionUrl = 'https://spapi.baidu.com/oauth/jscode2sessionkey';
+    // 获取小程序全局唯一后台接口调用凭据（access_token）
     private static $tokenUrl = 'https://openapi.baidu.com/oauth/2.0/token';
+    // 二维码短链
+    private static $getUrl = 'https://openapi.baidu.com/rest/2.0/smartapp/qrcode/get';
+    // 二维码长链
+    private static $getunlimitedUrl = 'https://openapi.baidu.com/rest/2.0/smartapp/qrcode/getunlimited';
 
     private static $config = array(
         'appid' => '', // appid
         'appkey' => '', // appkey
         'secret' => '', // secret
+        'access_token' => '', // access_token
     );
 
     /**
@@ -66,6 +73,42 @@ class Baidu
         $response = Http::get(self::$tokenUrl, $params);
         $result = json_decode($response, true);
         return $result;
+    }
+
+    /**
+     * [qrcode 获取小程序二维码，图片 Buffer]
+     * @param  [type]  $path  [小程序页面路径]
+     * @param  integer $width [小程序码宽度 px (默认430)]
+     * @param  integer $type  [获取类型 1:二维码短链 2:二维码长链  (默认1)]
+     * @param  boolean $mf    [是否包含logo 默认包含]
+     * @return [type]         [description]
+     */
+    public function qrcode($path, $width = 430, $type=1, $mf=true)
+    {
+        if (empty(self::$config['access_token'])) {
+            $access_token = self::accessToken();
+            $access_token = $access_token['access_token'];
+        } else {
+            $access_token = self::$config['access_token'];
+        }
+    	$params = array(
+    		'path' => $path, // 扫码进入的小程序页面路径
+    		'width' => $width, // 二维码的宽度，单位 px。
+            'mf' => $mf ? 1 : 1001, // 是否包含二维码内嵌 logo 标识, 1001 为不包含，默认包含
+    	);
+    	$postUrl = self::$getUrl . "?access_token=" . $access_token;
+
+    	if ($type == 2) {
+    		$postUrl = self::$getunlimitedUrl . "?access_token=" . $access_token;
+    	}
+
+    	$response = Http::post($postUrl, json_encode($params), array('Content-Type: application/json'));
+        $result = json_decode($response, true);
+        if (json_last_error() != JSON_ERROR_NONE) {
+            return $response;
+        } else {
+            throw new Exception("[" . $result['errcode'] . "] " . $result['errmsg']);
+        }
     }
 
     /**

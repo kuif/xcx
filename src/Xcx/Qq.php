@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-10-31T12:42:40+08:00
+ * @Last Modified time: 2020-12-11T15:07:57+08:00
  */
 namespace fengkui\Xcx;
 
@@ -15,12 +15,17 @@ use fengkui\Supports\Http;
  */
 class Qq
 {
+    // 登录凭证校验，获取用户 openid 等信息
     private static $jscode2sessionUrl = 'https://api.q.qq.com/sns/jscode2session';
+    // 获取小程序全局唯一后台接口调用凭据（access_token）
     private static $tokenUrl = 'https://api.q.qq.com/api/getToken';
+    // 获取小程序码
+    private static $CreateMiniCodeUrl = 'https://api.q.qq.com/api/json/qqa/CreateMiniCode';
 
     private static $config = array(
         'appid' => '', // appid
         'secret' => '', // secret
+        'access_token' => '', // access_token
     );
 
     /**
@@ -65,6 +70,38 @@ class Qq
         $response = Http::get(self::$tokenUrl, $params);
         $result = json_decode($response, true);
         return $result;
+    }
+
+    /**
+     * [qrcode 获取小程序二维码，图片 Buffer]
+     * @param  [type]  $path  [小程序页面路径]
+     * @param  integer $width [小程序码宽度 px (默认430)]
+     * @param  integer $type  [获取类型 1:二维码短链 2:二维码长链  (默认1)]
+     * @param  boolean $mf    [是否包含logo 默认包含]
+     * @return [type]         [description]
+     */
+    public function qrcode($path)
+    {
+        if (empty(self::$config['access_token'])) {
+            $access_token = self::accessToken();
+            $access_token = $access_token['access_token'];
+        } else {
+            $access_token = self::$config['access_token'];
+        }
+    	$params = array(
+    		'access_token' => $access_token, // 接口调用凭证
+    		'appid' => self::$config['appid'], // 小程序/小游戏appid
+            'path' => $path, // 扫码进入的小程序页面路径
+    	);
+    	$postUrl = self::$CreateMiniCodeUrl . "?access_token=" . $access_token;
+
+    	$response = Http::post($postUrl, json_encode($params), array('Content-Type: application/json'));
+        $result = json_decode($response, true);
+        if (json_last_error() != JSON_ERROR_NONE) {
+            return $response;
+        } else {
+            throw new Exception("[" . $result['errcode'] . "] " . $result['errmsg']);
+        }
     }
 
     /**

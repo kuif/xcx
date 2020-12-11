@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-12-01 13:28:45
+ * @Last Modified time: 2020-12-10T16:25:50+08:00
  */
 namespace fengkui\Xcx;
 
@@ -15,16 +15,23 @@ use fengkui\Supports\Http;
  */
 class Wechat
 {
+    // 登录凭证校验
     private static $jscode2sessionUrl = 'https://api.weixin.qq.com/sns/jscode2session';
+    // 获取小程序全局唯一后台接口调用凭据（access_token）
     private static $tokenUrl = 'https://api.weixin.qq.com/cgi-bin/token';
+    // 发送订阅消息
     private static $sendUrl = 'https://api.weixin.qq.com/cgi-bin/message/subscribe/send';
-    private static $createwxaqrcode = 'https://api.weixin.qq.com/cgi-bin/wxaapp/createwxaqrcode';
-    private static $getwxacode = 'https://api.weixin.qq.com/wxa/getwxacode';
-    private static $getwxacodeunlimit = 'https://api.weixin.qq.com/wxa/getwxacodeunlimit';
+    // 获取小程序二维码
+    private static $createwxaqrcodeUrl = 'https://api.weixin.qq.com/cgi-bin/wxaapp/createwxaqrcode';
+    // 获取小程序码
+    private static $getwxacodeUrl = 'https://api.weixin.qq.com/wxa/getwxacode';
+    // 获取小程序码
+    private static $getwxacodeunlimitUrl = 'https://api.weixin.qq.com/wxa/getwxacodeunlimit';
 
     private static $config = array(
         'appid' => '', // appid
         'secret' => '', // secret
+        'access_token' => '', // access_token
     );
 
     /**
@@ -110,45 +117,50 @@ class Wechat
     }
 
     /**
-     * [qrcode 获取小程序二维码]
-     * @param  [type]  $path  [小程序页面路径]
-     * @param  integer $width [小程序码宽度 px (默认430)]
-     * @param  integer $type  [获取类型 1:createwxaqrcode 2:getwxacode 3:getwxacodeunlimit  (默认2)]
-     * @return [type]         [description]
+     * [qrcode 获取小程序码或小程序二维码，图片 Buffer]
+     * @param  [type]  $path       [小程序页面路径]
+     * @param  integer $width      [小程序码宽度 px (默认430)]
+     * @param  integer $type       [获取类型 1:createwxaqrcode 2:getwxacode 3:getwxacodeunlimit  (默认2)]
+     * @param  boolean $is_hyaline [是否需要透明底色 (默认true)]
+     * @return [type]              [description]
      */
-    public function qrcode($path, $width = 430, $type=2)
+    public function qrcode($path, $width = 430, $type=2, $is_hyaline=true)
     {
-    	$access_token = self::accessToken();
-    	$access_token = $access_token['access_token'];
-
+        if (empty(self::$config['access_token'])) {
+            $access_token = self::accessToken();
+            $access_token = $access_token['access_token'];
+        } else {
+            $access_token = self::$config['access_token'];
+        }
     	$params = array(
-    		'access_token' => $access_token,
-    		'path' => $path, // 扫码进入的小程序页面路径
-    		'width' => $width, // 二维码的宽度，单位 px。
+    		'path'    => $path, // 扫码进入的小程序页面路径
+    		'width'   => $width, // 二维码的宽度，单位 px。
     	);
-
-    	$postUrl = self::$createwxaqrcode . "?access_token=" . $access_token;
+    	$postUrl = self::$createwxaqrcodeUrl . "?access_token=" . $access_token;
 
     	if ($type == 2) {
-    		$postUrl = self::$getwxacode . "?access_token=" . $access_token;
-
+    		$postUrl = self::$getwxacodeUrl . "?access_token=" . $access_token;
     		$params['auto_color'] = false; // 自动配置线条颜色
-    		$params['is_hyaline'] = true; // 是否需要透明底色
+    		$params['is_hyaline'] = $is_hyaline; // 是否需要透明底色
     	}
     	if ($type == 3) {
-    		$postUrl = self::$getwxacodeunlimit . "?access_token=" . $access_token;
+            $postUrl = self::$getwxacodeunlimitUrl . "?access_token=" . $access_token;
+            unset($params['path']);
+            $page = explode('?', $path);
+            $params['page'] = isset($page[0]) ? $page[0] : $path; // 扫码进入的小程序页面路径
+            $params['scene'] = isset($page[1]) ? $page[1] : '1=1'; // 扫码进入的小程序携带参数
 
-    		unset($params['path']);
-
-    		$params['scene'] = ''; // 扫码进入的小程序携带参数
-    		$params['page'] = $path; // 扫码进入的小程序页面路径
-
-    		$params['auto_color'] = false; // 自动配置线条颜色
-    		$params['is_hyaline'] = true; // 是否需要透明底色
+            $params['auto_color'] = false; // 自动配置线条颜色
+            $params['is_hyaline'] = $is_hyaline; // 是否需要透明底色
     	}
 
-    	$response = Http::post($postUrl, json_encode($postData), ['Content-Type: application/json']);
-    	return $result;
+    	$response = Http::post($postUrl, json_encode($params), array('Content-Type: application/json'));
+        $result = json_decode($response, true);
+        if (json_last_error() != JSON_ERROR_NONE) {
+            return $response;
+        } else {
+            throw new Exception("[" . $result['errcode'] . "] " . $result['errmsg']);
+        }
     }
 
     /**
