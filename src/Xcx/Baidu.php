@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-12-10T16:27:48+08:00
+ * @Last Modified time: 2020-12-15T18:27:37+08:00
  */
 namespace fengkui\Xcx;
 
@@ -19,6 +19,8 @@ class Baidu
     private static $jscode2sessionUrl = 'https://spapi.baidu.com/oauth/jscode2sessionkey';
     // 获取小程序全局唯一后台接口调用凭据（access_token）
     private static $tokenUrl = 'https://openapi.baidu.com/oauth/2.0/token';
+    // 推送模板消息
+    private static $sendUrl = 'https://openapi.baidu.com/rest/2.0/smartapp/template/send';
     // 二维码短链
     private static $getUrl = 'https://openapi.baidu.com/rest/2.0/smartapp/qrcode/get';
     // 二维码长链
@@ -75,6 +77,55 @@ class Baidu
         return $result;
     }
 
+    // 获取access_token
+    public static function getAccessToken()
+    {
+        if (empty(self::$config['access_token'])) {
+            $access_token = self::accessToken();
+            $access_token = $access_token['access_token'];
+        } else {
+            $access_token = self::$config['access_token'];
+        }
+        return $access_token;
+    }
+
+    /**
+     * [send 微信小程序发送订阅消息]
+     * @param  [type] $openid      [用户openid]
+     * @param  string $template_id [订阅消息模板ID]
+     * @param  array  $data        [发送数据]
+     * @param  string $page        [打开页面]
+     * @param  string $id          [场景 id ，例如表单 Id 、 orderId 或 payId]
+     * @param  string $type        [场景 type ，1：表单；2：百度收银台订单；3：直连订单。]
+     * @return [type]              [description]
+     */
+    public static function send($openid, $template_id, $data=[], $page='pages/index/index', $id='', $type=1)
+    {
+        $access_token = self::getAccessToken();
+        $sendUrl = self::$sendUrl . "?access_token=" . $access_token;
+
+        $dataArr = [];
+        foreach ($data as $key => $value) {
+            $dataArr[$key] = array('value'=>$value);
+        }
+        $postData = array(
+            'template_id'   => $template_id, // 所需下发的模板消息的 id
+            // 'touser' => '', // 接收者 swan_id (touser touser_openId两个参数不能都为空)
+            'touser_openId' => $openid, // 接收者 open_id (touser touser_openId两个参数不能都为空)
+            'data'          => $dataArr, // 模板内容
+            'page'          => $page, // 小程序跳转页面（示例 index?foo=bar），该字段不填则模板无跳转
+            'scene_id'      => $id, // 场景 id ，例如表单 Id 、 orderId 或 payId 。
+            'scene_type'    => $type, // 场景 type ，1：表单；2：百度收银台订单；3：直连订单。
+            // 'ext' => '', // {"xzh_id":111,"category_id":15}。
+        );
+
+        $response = Http::post($sendUrl, json_encode($postData), ['Content-Type: application/json']);
+        $result = json_decode($response, true);
+        if ($result['errno'] == 0)
+            return $result;
+        throw new Exception("[" . $result['errno'] . "] " . $result['msg']);
+    }
+
     /**
      * [qrcode 获取小程序二维码，图片 Buffer]
      * @param  [type]  $path  [小程序页面路径]
@@ -83,14 +134,9 @@ class Baidu
      * @param  boolean $mf    [是否包含logo 默认包含]
      * @return [type]         [description]
      */
-    public function qrcode($path, $width = 430, $type=1, $mf=true)
+    public static function qrcode($path, $width = 430, $type=1, $mf=true)
     {
-        if (empty(self::$config['access_token'])) {
-            $access_token = self::accessToken();
-            $access_token = $access_token['access_token'];
-        } else {
-            $access_token = self::$config['access_token'];
-        }
+        $access_token = self::getAccessToken();
     	$params = array(
     		'path' => $path, // 扫码进入的小程序页面路径
     		'width' => $width, // 二维码的宽度，单位 px。

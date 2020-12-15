@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-12-11T15:07:57+08:00
+ * @Last Modified time: 2020-12-15T17:18:44+08:00
  */
 namespace fengkui\Xcx;
 
@@ -19,12 +19,14 @@ class Qq
     private static $jscode2sessionUrl = 'https://api.q.qq.com/sns/jscode2session';
     // 获取小程序全局唯一后台接口调用凭据（access_token）
     private static $tokenUrl = 'https://api.q.qq.com/api/getToken';
+    // 发送订阅消息
+    private static $sendSubscriptionMessageUrl = 'https://api.q.qq.com/api/json/subscribe/SendSubscriptionMessage';
     // 获取小程序码
-    private static $CreateMiniCodeUrl = 'https://api.q.qq.com/api/json/qqa/CreateMiniCode';
+    private static $createMiniCodeUrl = 'https://api.q.qq.com/api/json/qqa/CreateMiniCode';
 
     private static $config = array(
-        'appid' => '', // appid
-        'secret' => '', // secret
+        'appid'     => '', // appid
+        'secret'    => '', // secret
         'access_token' => '', // access_token
     );
 
@@ -72,6 +74,54 @@ class Qq
         return $result;
     }
 
+    // 获取access_token
+    public static function getAccessToken()
+    {
+        if (empty(self::$config['access_token'])) {
+            $access_token = self::accessToken();
+            $access_token = $access_token['access_token'];
+        } else {
+            $access_token = self::$config['access_token'];
+        }
+        return $access_token;
+    }
+
+    /**
+     * [send 微信小程序发送订阅消息]
+     * @param  [type] $openid      [用户openid]
+     * @param  string $template_id [订阅消息模板ID]
+     * @param  array  $data        [发送数据]
+     * @param  string $page        [打开页面]
+     * @return [type]              [description]
+     */
+    public static function send($openid, $template_id, $data=[], $page='pages/index/index')
+    {
+        $access_token = self::getAccessToken();
+        $sendUrl = self::$sendSubscriptionMessageUrl . "?access_token=" . $access_token;
+
+        $dataArr = [];
+        foreach ($data as $key => $value) {
+            $dataArr[$key] = array('value'=>$value);
+        }
+        $postData = array(
+            'access_token'  => $access_token,
+            'touser'        => $openid, // 接收者（用户）的 openid
+            'template_id'   => $template_id, // 所需下发的订阅消息的模板id
+            'page'          => $page, // 点击订阅消息卡片后的跳转页面
+            'data'          => $dataArr, // 模板内容
+
+            // 'emphasis_keyword' => '', // 模板需要放大的关键词，不填则默认无放大。
+            // 'oac_appid' => '', // 若希望通过小程序绑定的公众号下发，则在该字段填入公众号的 appid
+            // 'use_robot' => '', // 若希望通过客服机器人下发，则在该字段填1
+        );
+
+        $response = Http::post($sendUrl, json_encode($postData), ['Content-Type: application/json']);
+        $result = json_decode($response, true);
+        if ($result['errcode'] == 0)
+            return $result;
+        throw new Exception("[" . $result['errcode'] . "] " . $result['errmsg']);
+    }
+
     /**
      * [qrcode 获取小程序二维码，图片 Buffer]
      * @param  [type]  $path  [小程序页面路径]
@@ -80,20 +130,15 @@ class Qq
      * @param  boolean $mf    [是否包含logo 默认包含]
      * @return [type]         [description]
      */
-    public function qrcode($path)
+    public static function qrcode($path)
     {
-        if (empty(self::$config['access_token'])) {
-            $access_token = self::accessToken();
-            $access_token = $access_token['access_token'];
-        } else {
-            $access_token = self::$config['access_token'];
-        }
+        $access_token = self::getAccessToken();
     	$params = array(
     		'access_token' => $access_token, // 接口调用凭证
     		'appid' => self::$config['appid'], // 小程序/小游戏appid
             'path' => $path, // 扫码进入的小程序页面路径
     	);
-    	$postUrl = self::$CreateMiniCodeUrl . "?access_token=" . $access_token;
+    	$postUrl = self::$createMiniCodeUrl . "?access_token=" . $access_token;
 
     	$response = Http::post($postUrl, json_encode($params), array('Content-Type: application/json'));
         $result = json_decode($response, true);

@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-12-11T15:37:19+08:00
+ * @Last Modified time: 2020-12-15T18:30:53+08:00
  */
 namespace fengkui\Xcx;
 
@@ -19,6 +19,8 @@ class Bytedance
     private static $jscode2sessionUrl = 'https://developer.toutiao.com/api/apps/jscode2session';
     // 获取 access_token
     private static $tokenUrl = 'https://developer.toutiao.com/api/apps/token';
+    // 订阅消息推送
+    private static $sendUrl = 'https://developer.toutiao.com/api/apps/subscribe_notification/developer/v1/notify'
     // 内容安全检测
     private static $antidirtUrl = 'https://developer.toutiao.com/api/v2/tags/text/antidirt';
     // 获取二维码
@@ -73,6 +75,51 @@ class Bytedance
         return $result;
     }
 
+        // 获取access_token
+    public static function getAccessToken()
+    {
+        if (empty(self::$config['access_token'])) {
+            $access_token = self::accessToken();
+            $access_token = $access_token['access_token'];
+        } else {
+            $access_token = self::$config['access_token'];
+        }
+        return $access_token;
+    }
+
+    /**
+     * [send 微信小程序发送订阅消息]
+     * @param  [type] $openid      [用户openid]
+     * @param  string $template_id [订阅消息模板ID]
+     * @param  array  $data        [发送数据]
+     * @param  string $page        [打开页面]
+     * @return [type]              [description]
+     */
+    public static function send($openid, $template_id, $data=[], $page='pages/index/index')
+    {
+        $access_token = self::getAccessToken();
+        $sendUrl = self::$sendUrl . "?access_token=" . $access_token;
+
+        $dataArr = [];
+        foreach ($data as $key => $value) {
+            $dataArr[$key] = array('value'=>$value);
+        }
+        $postData = array(
+            'access_token'  => $access_token, // 小程序 access_token，参考登录凭证检验
+            'app_id'        => self::$config['appid'], // 小程序的 id
+            'tpl_id'        => $template_id, // 模板的 id，参考订阅消息能力
+            'open_id'       => $openid, // 接收消息目标用户的 open_id，参考code2session
+            'data'          => $dataArr, // 用于填充模板的关键词数据
+            'page'          => $page, // 跳转的页面
+        );
+
+        $response = Http::post($sendUrl, json_encode($postData), ['Content-Type: application/json']);
+        $result = json_decode($response, true);
+        if ($result['err_no'] == 0)
+            return $result;
+        throw new Exception("[" . $result['err_no'] . "] " . $result['err_tips']);
+    }
+
     /**
      * [qrcode 获取小程序二维码，图片 Buffer]
      * @param  [type]  $path  [小程序页面路径]
@@ -81,14 +128,9 @@ class Bytedance
      * @param  boolean $icon  [是否包含logo 默认包含]
      * @return [type]         [description]
      */
-    public function qrcode($path, $width = 430, $type=1, $icon=true)
+    public static function qrcode($path, $width = 430, $type=1, $icon=true)
     {
-        if (empty(self::$config['access_token'])) {
-            $access_token = self::accessToken();
-            $access_token = $access_token['access_token'];
-        } else {
-            $access_token = self::$config['access_token'];
-        }
+        $access_token = self::getAccessToken();
         $appname = array( 1 => 'toutiao', 2 => 'douyin', 3 => 'pipixia', 4 => 'huoshan' );
 
     	$params = array(
