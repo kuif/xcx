@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-12-15T18:30:53+08:00
+ * @Last Modified time: 2020-12-16T09:50:36+08:00
  */
 namespace fengkui\Xcx;
 
@@ -20,7 +20,7 @@ class Bytedance
     // 获取 access_token
     private static $tokenUrl = 'https://developer.toutiao.com/api/apps/token';
     // 订阅消息推送
-    private static $sendUrl = 'https://developer.toutiao.com/api/apps/subscribe_notification/developer/v1/notify'
+    private static $sendUrl = 'https://developer.toutiao.com/api/apps/subscribe_notification/developer/v1/notify';
     // 内容安全检测
     private static $antidirtUrl = 'https://developer.toutiao.com/api/v2/tags/text/antidirt';
     // 获取二维码
