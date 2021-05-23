@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-12-15T17:18:35+08:00
+ * @Last Modified time: 2021-05-23T14:32:59+08:00
  */
 namespace fengkui\Xcx;
 
@@ -119,9 +119,7 @@ class Wechat
 
         $response = Http::post($sendUrl, json_encode($postData), ['Content-Type: application/json']);
         $result = json_decode($response, true);
-        if ($result['errcode'] == 0)
-            return $result;
-        throw new Exception("[" . $result['errcode'] . "] " . $result['errmsg']);
+        return $result;
     }
 
     /**
