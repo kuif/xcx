@@ -45,7 +45,7 @@ class Wechat
     }
 
     /**
-     * [openid 获取 openid]
+     * [openid 获取小程序 openid]
      * @param  string $code [code]
      * @return [type]       [description]
      */
@@ -123,7 +123,7 @@ class Wechat
     }
 
     /**
-     * [uniformSend description]
+     * [uniformSend 下发小程序和公众号统一的服务消息]
      * @param  [type] $openid      [用户openid]
      * @param  [type] $template_id [订阅消息模板ID]
      * @param  array  $data        [发送数据]

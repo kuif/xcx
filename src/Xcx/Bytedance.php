@@ -41,7 +41,7 @@ class Bytedance
     }
 
     /**
-     * [openid 获取 openid]
+     * [openid 获取小程序 openid]
      * @param  string $code [code]
      * @return [type]       [description]
      */

@@ -39,7 +39,7 @@ class Qq
     }
 
     /**
-     * [openid 获取 openid]
+     * [openid 获取小程序 openid]
      * @param  string $code [code]
      * @return [type]       [description]
      */
@@ -87,7 +87,7 @@ class Qq
     }
 
     /**
-     * [send 微信小程序发送订阅消息]
+     * [send 小程序发送订阅消息]
      * @param  [type] $openid      [用户openid]
      * @param  string $template_id [订阅消息模板ID]
      * @param  array  $data        [发送数据]
