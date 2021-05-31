@@ -1,5 +1,7 @@
 <h1 align="center">Xcx</h1>
 
+[![Latest Stable Version](https://poser.pugx.org/fengkui/xcx/v)](//packagist.org/packages/fengkui/xcx) [![Total Downloads](https://poser.pugx.org/fengkui/xcx/downloads)](//packagist.org/packages/fengkui/xcx) [![Latest Unstable Version](https://poser.pugx.org/fengkui/xcx/v/unstable)](//packagist.org/packages/fengkui/xcx) [![License](https://poser.pugx.org/fengkui/xcx/license)](//packagist.org/packages/fengkui/xcx)
+
 开发了多次小程序，每次都要翻文档、找之前的项目复制过来，费时费事，为了便于小程序的开发，干脆自己去造轮子，整合小程序（微信、QQ、百度、字节跳动）相关开发。
 
 **！！请先熟悉 相关小程序 说明文档！！请具有基本的 debug 能力！！**
@@ -146,7 +148,7 @@ class Xcx
         $type = $type ?: self::$type;
 
         // 相关配置
-        $wechatConfig = [ 
+        $wechatConfig = [
             'appid' => '',
             'secret' => '',
         ];
@@ -235,7 +237,7 @@ class Xcx
 
 ## 赏一杯咖啡吧
 <center class="half">
-    <img src="https://fengkui.net/uploads/images/ali.jpg" width="30%"/><img src="https://fengkui.net/uploads/images/wechat.png" width="30%"/>
+    <img src="https://fengkui.net/uploads/images/ali.jpg" width="200px"/><img src="https://fengkui.net/uploads/images/wechat.png" width="200px"/>
 </center>
 
 ## LICENSE
