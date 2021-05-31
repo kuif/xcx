@@ -36,7 +36,7 @@
 |  openid  |  获取小程序 openid  |
 |  accessToken  |  获取 access_token  |
 |  send  | 小程序发送订阅消息  |
-|  qrcode  | 获取小程序码或小程序二维码，图片 Buffer  |
+|  qrcode  | 获取小程序二维码，图片 Buffer  |
 |  decrypt  | 检验数据的真实性，并且获取解密后的明文  |
 
 ### 3、百度（Baidu）
@@ -46,7 +46,7 @@
 |  openid  |  获取小程序 openid  |
 |  accessToken  |  获取 access_token  |
 |  send  | 小程序发送订阅消息  |
-|  qrcode  | 获取小程序码或小程序二维码，图片 Buffer  |
+|  qrcode  | 获取小程序二维码，图片 Buffer  |
 |  decrypt  | 检验数据的真实性，并且获取解密后的明文  |
 
 
@@ -57,10 +57,10 @@
 |  openid  |  获取小程序 openid  |
 |  accessToken  |  获取 access_token  |
 |  send  | 小程序发送订阅消息  |
-|  qrcode  | 获取小程序码或小程序二维码，图片 Buffer  |
+|  qrcode  | 获取小程序二维码，图片 Buffer  |
 |  decrypt  | 检验数据的真实性，并且获取解密后的明文  |
 
-### 5、支付宝（Ali）
+### 5、支付宝（Alipay）
 
 ***待完善***
 
