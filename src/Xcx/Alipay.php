@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2021-05-31T16:42:41+08:00
+ * @Last Modified time: 2021-06-01T09:32:36+08:00
  */
 namespace fengkui\Xcx;
 
@@ -22,7 +22,7 @@ class Alipay
     private static $signType = 'RSA2';
 
     // 请求使用的编码格式
-    private static $postCharset='UTF-8';
+    private static $charset='utf-8';
 
     // 	仅支持JSON
     private static $format='json';
@@ -31,8 +31,11 @@ class Alipay
     private static $gatewayUrl = 'https://openapi.alipay.com/gateway.do';
     // private static $token = 'https://api.weixin.qq.com/cgi-bin/token';
 
-    // 换取授权访问令牌
+    // 换取授权访问令牌接口
     private static $tokenMethod = 'alipay.system.oauth.token';
+
+    // 小程序发送模板消息接口
+    private static $sendMethod = 'alipay.open.app.mini.templatemessage.send';
 
     // 小程序生成推广二维码接口
     private static $qrcodeMethod = 'alipay.open.app.qrcode.create';
@@ -41,6 +44,7 @@ class Alipay
         'app_id' => '', // 支付宝分配给开发者的应用ID
         'public_key' => '', // 请填写支付宝公钥，一行字符串
         'private_key' => '', // 请填写开发者私钥去头去尾去回车，一行字符串
+        'access_token' => '', // access_token
     );
 
     /**
@@ -54,12 +58,11 @@ class Alipay
     public static function unified($data)
     {
         empty($data['method']) && die('接口名称缺失');
-
         $params = [
             'app_id'    => self::$config['app_id'], // 支付宝分配给开发者的应用ID	2014072300007148
             // 'method'    => '', // 接口名称
             'format'    => self::$format, // 仅支持JSON	JSON
-            'charset'   => self::$postCharset, // 请求使用的编码格式，如utf-8,gbk,gb2312等	utf-8
+            'charset'   => self::$charset, // 请求使用的编码格式，如utf-8,gbk,gb2312等	utf-8
             'sign_type' => self::$signType, // 商户生成签名字符串所使用的签名算法类型，目前支持RSA2和RSA，推荐使用RSA2	RSA2
             // 'sign'      => '', // 商户请求参数的签名串，详见签名	详见示例
             'timestamp' => date('Y-m-d H:i:s'), // 发送请求的时间，格式"yyyy-MM-dd HH:mm:ss"	2014-07-24 03:07:50
@@ -70,25 +73,56 @@ class Alipay
         $params['sign'] = self::makeSign($params);
 
         $response = Http::get(self::$gatewayUrl, $params);
-        strtolower(self::$postCharset) == 'gbk' && $response = mb_convert_encoding($response, "utf8", "gbk");
+        strtolower(self::$charset) == 'gbk' && $response = mb_convert_encoding($response, "utf8", "gbk");
 
         $result = json_decode($response, true);
         return $result;
     }
 
     /**
-     * [openid 获取小程序 openid]
+     * [token 获取小程序用户user_id及access_token]
      * @param  [type] $code          [code]
      * @param  string $refresh_token [description]
      * @return [type]                [description]
      */
-    public static function openid($code, $refresh_token='')
+    public static function token($code, $refresh_token='')
     {
         $params = [
             'method'        => self::$tokenMethod, // 接口名称
             'grant_type'    => $refresh_token ? 'refresh_token' : 'authorization_code', // authorization_code时，用code换取；refresh_token时，用refresh_token换取
             'code'          => $code, // 授权码，用户对应用授权后得到。
             'refresh_token' => $refresh_token, // 刷新令牌，上次换取访问令牌时得到。见出参的refresh_token字段
+        ];
+        $result = self::unified($params);
+        return $result;
+    }
+
+    /**
+     * [send 小程序发送模板消息]
+     * @param  [type] $user_id     [接收模板消息的用户 user_id]
+     * @param  [type] $template_id [消息模板ID]
+     * @param  array  $data        [模板消息内容]
+     * @param  string $page        [小程序的跳转页面]
+     * @param  string $form_id     [支付消息模板（trade_no）;表单提交模板（表单号）;刷脸消息模板（ftoken）;说明：订阅消息模板无需传入本参数。]
+     * @return [type]              [description]
+     */
+    public static function send($user_id, $template_id, $data=[], $page='pages/index/index', $form_id='')
+    {
+        $dataArr = [];
+        foreach ($data as $key => $value) {
+            $dataArr[$key] = array('value'=>$value);
+        }
+        $bizContent = [
+            'to_user_id'        => $user_id, // 接收模板消息的用户 user_id
+            'user_template_id'  => $template_id, // 消息模板ID
+            'page'              => $page, // 小程序的跳转页面
+            'data'              => $dataArr, // 模板消息内容
+        ];
+        // form_id:支付消息模板（trade_no）;表单提交模板（表单号）;刷脸消息模板（ftoken）;说明：订阅消息模板无需传入本参数。
+        $form_id && $bizContent['form_id'] = $form_id;
+        $params = [
+            'method'        => self::$sendMethod, // 接口名称
+            'biz_content' => json_encode($bizContent),
         ];
         $result = self::unified($params);
         return $result;

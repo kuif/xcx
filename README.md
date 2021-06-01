@@ -61,8 +61,11 @@
 |  decrypt  | 检验数据的真实性，并且获取解密后的明文  |
 
 ### 5、支付宝（Alipay）
-
-***待完善***
+|  method  |  描述  |
+| :-------: | :-------:   |
+|  token  |  获取小程序用户user_id及access_token  |
+|  send  | 小程序发送模板消息  |
+|  qrcode  | 小程序推广码，链接地址  |
 
 ## 安装
 ```shell
@@ -71,6 +74,16 @@ composer require fengkui/xcx
 
 ## 完善相关配置
 ```php
+# 微信小程序配置
+$wechatConfig = [
+    'appid' => '',
+    'secret' => '',
+];
+# QQ小程序配置
+$qqConfig = [
+    'appid' => '',
+    'secret' => '',
+];
 # 百度小程序配置
 $baiduConfig = [
     'appid' => '',
@@ -82,15 +95,11 @@ $bytedanceConfig = [
     'appid' => '',
     'secret' => '',
 ];
-# QQ小程序配置
-$qqConfig = [
-    'appid' => '',
-    'secret' => '',
-];
-# 微信小程序配置
-$wechatConfig = [
-    'appid' => '',
-    'secret' => '',
+# 支付宝小程序配置
+$alipayConfig = [
+    'app_id' => '', // 支付宝分配给开发者的应用ID
+    'public_key' => '', // 请填写支付宝公钥
+    'private_key' => '', // 请填写开发者私钥去头去尾去回车
 ];
 ```
 
@@ -102,6 +111,7 @@ $xcx = new \fengkui\Xcx\Wechat($wechatConfig); // 微信
 $xcx = new \fengkui\Xcx\Qq($qqConfig); // QQ
 $xcx = new \fengkui\Xcx\Baidu($baiduConfig); // 百度
 $xcx = new \fengkui\Xcx\Bytedance($bytedanceConfig); // 字节跳动
+$xcx = new \fengkui\Xcx\Alipay($alipayConfig); // 支付宝
 ```
 
 ### 公共使用
