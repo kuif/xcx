@@ -49,7 +49,6 @@
 |  qrcode  | 获取小程序二维码，图片 Buffer  |
 |  decrypt  | 检验数据的真实性，并且获取解密后的明文  |
 
-
 ### 4、字节跳动（Bytedance）
 
 |  method  |  描述  |
