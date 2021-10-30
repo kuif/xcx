@@ -35,7 +35,7 @@ class Baidu
 
     /**
      * [__construct 构造函数]
-     * @param [type] $config [传递支付相关配置]
+     * @param [type] $config [传递相关配置]
      */
     public function __construct($config=NULL){
         $config && self::$config = $config;
