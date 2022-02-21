@@ -41,7 +41,7 @@ class Wechat
      * @param [type] $config [传递相关配置]
      */
     public function __construct($config=NULL){
-        $config && self::$config = $config;
+        $config && self::$config = array_merge(self::$config, $config);
     }
 
     /**
