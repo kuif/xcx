@@ -23,6 +23,8 @@ class Qq
     private static $sendSubscriptionMessageUrl = 'https://api.q.qq.com/api/json/subscribe/SendSubscriptionMessage';
     // 获取小程序码
     private static $createMiniCodeUrl = 'https://api.q.qq.com/api/json/qqa/CreateMiniCode';
+    // 检查内容是否违规
+    private static $securityUrl = 'https://api.q.qq.com/api/json/security/';
 
     private static $config = array(
         'appid'     => '', // appid
@@ -145,6 +147,46 @@ class Qq
         } else {
             throw new Exception("[" . $result['errcode'] . "] " . $result['errmsg']);
         }
+    }
+
+    /**
+     * [check 检查内容是否违规]
+     * @param  [type]  $content [内容]
+     * @param  [type]  $openid  [用户openid]
+     * @param  integer $scene   [场景枚举值（1 资料；2 评论；3 论坛；4 社交日志）]
+     * @return [type]           [description]
+     */
+    public static function check($content, $openid, $scene = 1)
+    {
+        $access_token = self::getAccessToken();
+        $info = pathinfo($content);
+
+        $params = array(
+            'openid'    => $openid, // 用户的openid
+            'version'   => 2, // 接口版本号，2.0版本为固定值2
+            'scene'     => in_array($scene, [1,2,3,4]) ? $scene : 1, // 场景枚举值（1 资料；2 评论；3 论坛；4 社交日志）
+        );
+
+        if (isset($info['extension'])) {
+            $postUrl = self::$securityUrl. 'ImgSecCheck' . "?access_token=" . $access_token;
+            $extension = $info['extension'];
+            $imageExtensionArr = ['jpg', 'jepg', 'png', 'bmp', 'gif'];
+            $audioExtensionArr = ['mp3', 'aac', 'ac3', 'wma', 'flac', 'vorbis', 'opus', 'wav'];
+            $params['media_url'] = $content;
+            if (in_array($extension, $imageExtensionArr)) {
+                $params['media_type'] = 2;
+            } elseif (in_array($extension, $audioExtensionArr)) {
+                $params['media_type'] = 1;
+            } else {
+                throw new Exception("[10000] 当前类型不支持");
+            }
+        } else {
+            $postUrl = self::$securityUrl. 'MsgSecCheck' . "?access_token=" . $access_token;
+            $params['content'] = $content;
+        }
+        $response = Http::post($postUrl, json_encode($params), array('Content-Type: application/json'));
+        $result = json_decode($response, true);
+        return $result;
     }
 
     /**
