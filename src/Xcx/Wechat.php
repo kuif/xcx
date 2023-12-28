@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2022-03-21 14:47:54
+ * @Last Modified time: 2023-12-28T17:45:35+08:00
  */
 namespace fengkui\Xcx;
 
@@ -15,6 +15,8 @@ use fengkui\Supports\Http;
  */
 class Wechat
 {
+    // 微信小程序url
+    private static $wxaUrl = 'https://api.weixin.qq.com/wxa';
     // 登录凭证校验
     private static $jscode2sessionUrl = 'https://api.weixin.qq.com/sns/jscode2session';
     // 获取小程序全局唯一后台接口调用凭据（access_token）
@@ -25,17 +27,21 @@ class Wechat
     private static $uniformSendUrl = 'https://api.weixin.qq.com/cgi-bin/message/wxopen/template/uniform_send';
     // 获取小程序二维码
     private static $createwxaqrcodeUrl = 'https://api.weixin.qq.com/cgi-bin/wxaapp/createwxaqrcode';
-    // 获取小程序码
-    private static $getwxacodeUrl = 'https://api.weixin.qq.com/wxa/getwxacode';
-    // 获取小程序码
-    private static $getwxacodeunlimitUrl = 'https://api.weixin.qq.com/wxa/getwxacodeunlimit';
-    // 检查内容是否违规
-    private static $wxaCheckUrl = 'https://api.weixin.qq.com/wxa/';
 
     private static $config = array(
         'appid'     => '', // appid
         'secret'    => '', // secret
         'access_token' => '', // access_token
+
+        'aes_sn'    => '',
+        'aes_key'   => '',
+
+        'rsa_sn'    => '',
+        'public_key' => '',
+        'private_key' => '',
+
+        'cert_sn'   => '',
+        'cert_key' => '',
     );
 
     /**
@@ -61,6 +67,25 @@ class Wechat
         ];
 
         $response = Http::get(self::$jscode2sessionUrl, $params);
+        $result = json_decode($response, true);
+        return $result;
+    }
+
+    /**
+     * [userPhone 获取用户手机号]
+     * @param  string $code [code]
+     * @return [type]       [description]
+     */
+    public static function userPhone($code)
+    {
+        $access_token = self::getAccessToken();
+        $postUrl = self::$wxaUrl . '/business/getuserphonenumber' . "?access_token=" . $access_token;
+
+        $postData = array(
+            'code'  => $code, // 模板内容
+        );
+
+        $response = Http::post($postUrl, json_encode($postData), ['Content-Type: application/json']);
         $result = json_decode($response, true);
         return $result;
     }
@@ -196,12 +221,12 @@ class Wechat
     	$postUrl = self::$createwxaqrcodeUrl . "?access_token=" . $access_token;
 
     	if ($type == 2) {
-    		$postUrl = self::$getwxacodeUrl . "?access_token=" . $access_token;
+    		$postUrl = self::$wxaUrl . '/getwxacode' . "?access_token=" . $access_token;
     		$params['auto_color'] = false; // 自动配置线条颜色
     		$params['is_hyaline'] = $is_hyaline; // 是否需要透明底色
     	}
     	if ($type == 3) {
-            $postUrl = self::$getwxacodeunlimitUrl . "?access_token=" . $access_token;
+            $postUrl = self::$wxaUrl . '/getwxacodeunlimit' . "?access_token=" . $access_token;
             unset($params['path']);
             $page = explode('?', $path);
             $params['page'] = isset($page[0]) ? $page[0] : $path; // 扫码进入的小程序页面路径
@@ -239,7 +264,7 @@ class Wechat
     	);
 
         if (isset($info['extension'])) {
-            $postUrl = self::$wxaCheckUrl. 'media_check_async' . "?access_token=" . $access_token;
+            $postUrl = self::$wxaUrl. '/media_check_async' . "?access_token=" . $access_token;
             $extension = $info['extension'];
             $imageExtensionArr = ['jpg', 'jepg', 'png', 'bmp', 'gif'];
             $audioExtensionArr = ['mp3', 'aac', 'ac3', 'wma', 'flac', 'vorbis', 'opus', 'wav'];
@@ -252,7 +277,7 @@ class Wechat
                 throw new Exception("[10000] 当前类型不支持");
             }
         } else {
-            $postUrl = self::$wxaCheckUrl. 'msg_sec_check' . "?access_token=" . $access_token;
+            $postUrl = self::$wxaUrl. '/msg_sec_check' . "?access_token=" . $access_token;
             $params['content'] = $content;
         }
     	$response = Http::post($postUrl, json_encode($params), array('Content-Type: application/json'));
@@ -289,6 +314,130 @@ class Wechat
             throw new Exception("[41003] Appid does not match");
 
         return $result;
+    }
+
+    // 封装curl加密请求
+    public function request($url, $req)
+    {
+        $config = self::$config;
+        $time = time();
+
+        $nonce = rtrim(base64_encode(random_bytes(16)), '='); // 16位随机字符
+        $addReq = ["_n" => $nonce, "_appid" => $config['appid'], "_timestamp" => $time]; // 添加字段
+        $realReq = array_merge($addReq, $req);
+        $realReq = json_encode($realReq);
+
+        //额外参数
+        $message = $url . "|" . $config['appid'] . "|" . $time . "|" . $config['aes_sn'];
+
+        $iv = random_bytes(12); // 12位随机字符
+        // 数据加密处理
+        $cipher = openssl_encrypt($realReq, "aes-256-gcm", base64_decode($config['aes_key']), OPENSSL_RAW_DATA, $iv, $tag, $message);
+        $iv = base64_encode($iv);
+        $data = base64_encode($cipher);
+        $authTag = base64_encode($tag);
+        $reqData = ["iv" => $iv, "data" => $data, "authtag" => $authTag];
+
+        // 获取签名
+        $reqData = json_encode($reqData);
+        $payload = $url . "\n" . $config["appid"] . "\n" . $time . "\n" . $reqData; // 拼接字符串用双引号
+        // 使用phpseclib3\Crypt\RSA（phpseclib V3）版本生成签名
+        $private_key = self::getCertFile($config['private_key']);
+        if (!class_exists('\phpseclib3\Crypt\RSA'))
+            throw new \Exception("composer包phpseclib/phpseclib不存在，请安装后在进行操作");
+
+        $rsa = \phpseclib3\Crypt\RSA::loadPrivateKey($private_key);
+        $signature = $rsa->withPadding(\phpseclib3\Crypt\RSA::SIGNATURE_PSS)
+                ->withHash('sha256')
+                ->withMGFHash('sha256')
+                ->sign($payload);
+        $signature = base64_encode($signature);
+        $header = [
+            'Content-Type:application/json;charset=utf-8',
+            'Accept:application/json',
+            'Wechatmp-Appid:' . $config['appid'],
+            'Wechatmp-TimeStamp:' . $time,
+            'Wechatmp-Signature:' . $signature
+        ];
+
+        $access_token = self::getAccessToken();
+        $urls = $url . "?access_token=" . $access_token;
+        // 封装的curl请求 httpRequest($url, $method="GET", $params='', $headers=[], $pem=[], $debug = false, $timeout = 60)
+        $response = Http::httpRequest($urls, "POST", $reqData, $header, [], true);
+        $result = json_decode($response['response'], true);
+        // 请求平台报错
+        if (isset($result['errcode']))
+            throw new \Exception("[" . $result['errcode'] . "] " . $result['errmsg']);
+
+        // 响应参数验签
+        $vertify = $this->verifySign($url, $response);
+        if (!$vertify)
+            throw new \Exception("微信响应接口，验证签名失败");
+
+        // 响应参数解密
+        return $this->decryptToString($url, $response['response_header']['Wechatmp-TimeStamp'], $result);
+    }
+
+    // 获取证书文件
+    public static function getCertFile($filePath='')
+    {
+        $filePath = iconv('utf-8', 'gb2312', $filePath); //对可能出现的中文名称进行转码
+        if (file_exists($filePath))
+            return file_get_contents($filePath);
+        return '';
+    }
+
+    // 验证签名
+    private function verifySign($url, $response)
+    {
+        $config = self::$config;
+        $headers = $response['response_header'];
+        $reTime = $headers['Wechatmp-TimeStamp'];
+
+        if ($config['appid'] != $headers['Wechatmp-Appid'] || time() - $reTime > 300){
+            throw new \ErrorException('返回值安全字段校验失败');
+        }
+        if ($config['cert_sn'] == $headers['Wechatmp-Serial']) {
+            $signature = $headers['Wechatmp-Signature'];
+        } elseif (isset($headers['Wechatmp-Serial-Deprecated']) && $config['cert_sn'] == $headers['Wechatmp-Serial-Deprecated']) {
+            $signature = $headers['Wechatmp-Signature-Deprecated'];
+        } else {
+            throw new \ErrorException('返回值sn不匹配');
+        }
+        $reData = $response['response'];
+        $payload = $url . "\n" . $config["appid"] . "\n" . $reTime . "\n" . $reData;
+        $payload = utf8_encode($payload);
+        $signature = base64_decode($signature);
+
+        $cert_key = self::getCertFile($config['cert_key']);
+        $pkey = openssl_pkey_get_public($cert_key);
+        $keyData = openssl_pkey_get_details($pkey);
+        $public_key = str_replace('-----BEGIN PUBLIC KEY-----', '', $keyData['key']);
+        $public_key = trim(str_replace('-----END PUBLIC KEY-----', '', $public_key));
+
+        $rsa = \phpseclib3\Crypt\RSA::loadPublicKey($public_key);
+        $recode = $rsa->withPadding(\phpseclib3\Crypt\RSA::SIGNATURE_PSS)
+                ->withHash('sha256')
+                ->withMGFHash('sha256')
+                ->verify($payload, $signature);
+
+        return $recode;
+    }
+
+    // 解析加密信息
+    private function decryptToString($url, $ts, $result)
+    {
+        $config = self::$config;
+        $message = $url . '|' . $config['appid'] . '|' . $ts . '|' . $config['aes_sn'];
+        $key = base64_decode($config['aes_key']);
+        $iv = base64_decode($result['iv']);
+        $data = base64_decode($result['data']);
+        $authTag = base64_decode($result['authtag']);
+        $result = openssl_decrypt($data, "aes-256-gcm", $key, OPENSSL_RAW_DATA, $iv, $authTag, $message);
+        if (!$result) {
+            throw new Exception('加密字符串使用 aes-256-gcm 解析失败');
+        }
+        return json_decode($result, true) ?: '';
     }
 
 }

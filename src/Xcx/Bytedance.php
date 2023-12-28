@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2021-05-23T14:33:09+08:00
+ * @Last Modified time: 2023-04-12 16:49:22
  */
 namespace fengkui\Xcx;
 
@@ -18,7 +18,7 @@ class Bytedance
     // 通过服务器发送请求的方式获取 session_key 和 openId
     private static $jscode2sessionUrl = 'https://developer.toutiao.com/api/apps/jscode2session';
     // 获取 access_token
-    private static $tokenUrl = 'https://developer.toutiao.com/api/apps/token';
+    private static $tokenUrl = 'https://developer.toutiao.com/api/apps/v2/token';
     // 订阅消息推送
     private static $sendUrl = 'https://developer.toutiao.com/api/apps/subscribe_notification/developer/v1/notify';
     // 内容安全检测
