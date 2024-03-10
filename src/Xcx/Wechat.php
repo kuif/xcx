@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-13 17:11:17
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2023-12-28T17:45:35+08:00
+ * @Last Modified time: 2024-01-02T16:47:05+08:00
  */
 namespace fengkui\Xcx;
 
@@ -20,7 +20,7 @@ class Wechat
     // 登录凭证校验
     private static $jscode2sessionUrl = 'https://api.weixin.qq.com/sns/jscode2session';
     // 获取小程序全局唯一后台接口调用凭据（access_token）
-    private static $tokenUrl = 'https://api.weixin.qq.com/cgi-bin/token';
+    private static $stableTokenUrl = 'https://api.weixin.qq.com/cgi-bin/stable_token';
     // 发送订阅消息
     private static $sendUrl = 'https://api.weixin.qq.com/cgi-bin/message/subscribe/send';
     // 下发小程序和公众号统一的服务消息
@@ -102,7 +102,7 @@ class Wechat
             'secret'    => self::$config['secret'],
         ];
 
-        $response = Http::get(self::$tokenUrl, $params);
+        $response = Http::post(self::$stableTokenUrl, json_encode($params), ['Content-Type: application/json']);
         $result = json_decode($response, true);
         return $result;
     }
@@ -204,14 +204,24 @@ class Wechat
     }
 
     /**
-     * [qrcode 获取小程序码或小程序二维码，图片 Buffer]
+     * [qrcode
      * @param  [type]  $path       [小程序页面路径]
-     * @param  integer $width      [小程序码宽度 px (默认430)]
-     * @param  integer $type       [获取类型 1:createwxaqrcode 2:getwxacode 3:getwxacodeunlimit  (默认2)]
-     * @param  boolean $is_hyaline [是否需要透明底色 (默认true)]
+     * @param  integer $width      []
+     * @param  integer $type       [
+     * @param  boolean $is_hyaline []
      * @return [type]              [description]
      */
-    public static function qrcode($path, $width = 430, $type=2, $is_hyaline=true)
+
+    /**
+     * [qrcode 获取小程序码或小程序二维码，图片 Buffer]
+     * @param  [type]  $path        [小程序页面路径]
+     * @param  integer $type        [获取类型 1:createwxaqrcode 2(默认):getwxacode 3:getwxacodeunlimit]
+     * @param  string  $env_version [要打开的小程序版本。正式版为 release(默认) 体验版为 trial 开发版为 develop]
+     * @param  integer $width       [小程序码宽度 px (默认430)]
+     * @param  boolean $is_hyaline  [是否需要透明底色 (默认true)]
+     * @return [type]               [description]
+     */
+    public static function qrcode($path, $type=2, $env_version = 'release', $width = 430,  $is_hyaline=true)
     {
         $access_token = self::getAccessToken();
     	$params = array(
@@ -233,9 +243,11 @@ class Wechat
             $params['scene'] = isset($page[1]) ? $page[1] : '1=1'; // 扫码进入的小程序携带参数
 
             $params['auto_color'] = false; // 自动配置线条颜色
+            $params['check_path'] = false; // 不检查页面是否存在
             $params['is_hyaline'] = $is_hyaline; // 是否需要透明底色
     	}
 
+        $params['env_version'] = $env_version;
     	$response = Http::post($postUrl, json_encode($params), array('Content-Type: application/json'));
         $result = json_decode($response, true);
         if (json_last_error() != JSON_ERROR_NONE) {
@@ -317,10 +329,20 @@ class Wechat
     }
 
     // 封装curl加密请求
-    public function request($url, $req)
+    public static function request($url, $req)
     {
         $config = self::$config;
         $time = time();
+
+        if (strstr($url, '?')) {
+            $urls = $url;
+            $url = mb_substr($url, 0, strpos($url, '?'));
+        } else {
+            $access_token = self::getAccessToken();
+            $urls = $url . "?access_token=" . $access_token;
+        }
+
+        // dump($urls);die;
 
         $nonce = rtrim(base64_encode(random_bytes(16)), '='); // 16位随机字符
         $addReq = ["_n" => $nonce, "_appid" => $config['appid'], "_timestamp" => $time]; // 添加字段
@@ -360,8 +382,6 @@ class Wechat
             'Wechatmp-Signature:' . $signature
         ];
 
-        $access_token = self::getAccessToken();
-        $urls = $url . "?access_token=" . $access_token;
         // 封装的curl请求 httpRequest($url, $method="GET", $params='', $headers=[], $pem=[], $debug = false, $timeout = 60)
         $response = Http::httpRequest($urls, "POST", $reqData, $header, [], true);
         $result = json_decode($response['response'], true);
@@ -370,12 +390,12 @@ class Wechat
             throw new \Exception("[" . $result['errcode'] . "] " . $result['errmsg']);
 
         // 响应参数验签
-        $vertify = $this->verifySign($url, $response);
+        $vertify = self::verifySign($url, $response);
         if (!$vertify)
             throw new \Exception("微信响应接口，验证签名失败");
 
         // 响应参数解密
-        return $this->decryptToString($url, $response['response_header']['Wechatmp-TimeStamp'], $result);
+        return self::decryptToString($url, $response['response_header']['Wechatmp-TimeStamp'], $result);
     }
 
     // 获取证书文件
@@ -388,7 +408,7 @@ class Wechat
     }
 
     // 验证签名
-    private function verifySign($url, $response)
+    private static function verifySign($url, $response)
     {
         $config = self::$config;
         $headers = $response['response_header'];
@@ -425,7 +445,7 @@ class Wechat
     }
 
     // 解析加密信息
-    private function decryptToString($url, $ts, $result)
+    private static function decryptToString($url, $ts, $result)
     {
         $config = self::$config;
         $message = $url . '|' . $config['appid'] . '|' . $ts . '|' . $config['aes_sn'];
