@@ -122,7 +122,7 @@ class Alipay
         $form_id && $bizContent['form_id'] = $form_id;
         $params = [
             'method'        => self::$sendMethod, // 接口名称
-            'biz_content' => json_encode($bizContent),
+            'biz_content' => json_encode($bizContent, JSON_UNESCAPED_UNICODE),
         ];
         $result = self::unified($params);
         return $result;

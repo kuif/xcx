@@ -85,7 +85,7 @@ class Wechat
             'code'  => $code, // 模板内容
         );
 
-        $response = Http::post($postUrl, json_encode($postData), ['Content-Type: application/json']);
+        $response = Http::post($postUrl, json_encode($postData, JSON_UNESCAPED_UNICODE), ['Content-Type: application/json']);
         $result = json_decode($response, true);
         return $result;
     }
@@ -102,7 +102,7 @@ class Wechat
             'secret'    => self::$config['secret'],
         ];
 
-        $response = Http::post(self::$stableTokenUrl, json_encode($params), ['Content-Type: application/json']);
+        $response = Http::post(self::$stableTokenUrl, json_encode($params, JSON_UNESCAPED_UNICODE), ['Content-Type: application/json']);
         $result = json_decode($response, true);
         return $result;
     }
@@ -144,7 +144,7 @@ class Wechat
             'data'          => $dataArr, // 模板内容
         );
 
-        $response = Http::post($sendUrl, json_encode($postData), ['Content-Type: application/json']);
+        $response = Http::post($sendUrl, json_encode($postData, JSON_UNESCAPED_UNICODE), ['Content-Type: application/json']);
         $result = json_decode($response, true);
         return $result;
     }
@@ -198,7 +198,7 @@ class Wechat
             'data'          => $dataArr, // 公众号模板消息的数据
         );
 
-        $response = Http::post($sendUrl, json_encode($postData), ['Content-Type: application/json']);
+        $response = Http::post($sendUrl, json_encode($postData, JSON_UNESCAPED_UNICODE), ['Content-Type: application/json']);
         $result = json_decode($response, true);
         return $result;
     }
@@ -248,7 +248,7 @@ class Wechat
     	}
 
         $params['env_version'] = $env_version;
-    	$response = Http::post($postUrl, json_encode($params), array('Content-Type: application/json'));
+    	$response = Http::post($postUrl, json_encode($params, JSON_UNESCAPED_UNICODE), array('Content-Type: application/json'));
         $result = json_decode($response, true);
         if (json_last_error() != JSON_ERROR_NONE) {
             return $response;
@@ -292,7 +292,7 @@ class Wechat
             $postUrl = self::$wxaUrl. '/msg_sec_check' . "?access_token=" . $access_token;
             $params['content'] = $content;
         }
-    	$response = Http::post($postUrl, json_encode($params), array('Content-Type: application/json'));
+    	$response = Http::post($postUrl, json_encode($params, JSON_UNESCAPED_UNICODE), array('Content-Type: application/json'));
         $result = json_decode($response, true);
         return $result;
     }
@@ -347,7 +347,7 @@ class Wechat
         $nonce = rtrim(base64_encode(random_bytes(16)), '='); // 16位随机字符
         $addReq = ["_n" => $nonce, "_appid" => $config['appid'], "_timestamp" => $time]; // 添加字段
         $realReq = array_merge($addReq, $req);
-        $realReq = json_encode($realReq);
+        $realReq = json_encode($realReq, JSON_UNESCAPED_UNICODE);
 
         //额外参数
         $message = $url . "|" . $config['appid'] . "|" . $time . "|" . $config['aes_sn'];
@@ -361,7 +361,7 @@ class Wechat
         $reqData = ["iv" => $iv, "data" => $data, "authtag" => $authTag];
 
         // 获取签名
-        $reqData = json_encode($reqData);
+        $reqData = json_encode($reqData, JSON_UNESCAPED_UNICODE);
         $payload = $url . "\n" . $config["appid"] . "\n" . $time . "\n" . $reqData; // 拼接字符串用双引号
         // 使用phpseclib3\Crypt\RSA（phpseclib V3）版本生成签名
         $private_key = self::getCertFile($config['private_key']);
