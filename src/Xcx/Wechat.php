@@ -204,15 +204,6 @@ class Wechat
     }
 
     /**
-     * [qrcode
-     * @param  [type]  $path       [小程序页面路径]
-     * @param  integer $width      []
-     * @param  integer $type       [
-     * @param  boolean $is_hyaline []
-     * @return [type]              [description]
-     */
-
-    /**
      * [qrcode 获取小程序码或小程序二维码，图片 Buffer]
      * @param  [type]  $path        [小程序页面路径]
      * @param  integer $type        [获取类型 1:createwxaqrcode 2(默认):getwxacode 3:getwxacodeunlimit]

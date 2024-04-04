@@ -1,6 +1,6 @@
 {
     "name": "fengkui/xcx",
-    "description": "小程序的相关信息获取与使用",
+    "description": "整合多端小程序（微信、QQ、百度、字节跳动、钉钉、支付宝）相关信息获取与使用",
     "license": "MIT",
     "authors": [
         {
@@ -10,7 +10,7 @@
     ],
     "require": {
         "fengkui/supports": "*"
-    }, 
+    },
     "autoload": {
         "psr-4": {
             "fengkui\\": "src"

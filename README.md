@@ -2,7 +2,8 @@
 
 [![Latest Stable Version](https://poser.pugx.org/fengkui/xcx/v)](//packagist.org/packages/fengkui/xcx) [![Total Downloads](https://poser.pugx.org/fengkui/xcx/downloads)](//packagist.org/packages/fengkui/xcx) [![Latest Unstable Version](https://poser.pugx.org/fengkui/xcx/v/unstable)](//packagist.org/packages/fengkui/xcx) [![License](https://poser.pugx.org/fengkui/xcx/license)](//packagist.org/packages/fengkui/xcx)
 
-开发了多次小程序，每次都要翻文档、找之前的项目复制过来，费时费事，为了便于小程序的开发，干脆自己去造轮子，整合小程序（微信、QQ、百度、字节跳动）相关开发。
+开发了多次小程序，每次都要翻文档、找之前的项目复制过来，费时费事，  
+为了便于小程序的开发，干脆自己去造轮子，整合小程序（微信、QQ、百度、字节跳动、钉钉、支付宝）相关开发。
 
 **！！请先熟悉 相关小程序 说明文档！！请具有基本的 debug 能力！！**
 
@@ -17,15 +18,18 @@
 - PHP 7.0+
 - composer
 
+## 使用文档
+- [https://docs.fengkui.net/xcx/](https://docs.fengkui.net/xcx/)
+
 ## 支持的小程序
 ### 1、微信（Wechat）
 
 |  method  |  描述  |
 | :-------: | :-------:   |
 |  openid  |  获取小程序 openid  |
+|  userPhone  |  获取用户手机号  |
 |  accessToken  |  获取 access_token  |
 |  send  | 微信小程序发送订阅消息  |
-|  uniformSend  | 下发小程序和公众号统一的服务消息  |
 |  qrcode  | 获取小程序码或小程序二维码，图片 Buffer  |
 |  decrypt  | 检验数据的真实性，并且获取解密后的明文  |
 
@@ -59,10 +63,19 @@
 |  qrcode  | 获取小程序二维码，图片 Buffer  |
 |  decrypt  | 检验数据的真实性，并且获取解密后的明文  |
 
-### 5、支付宝（Alipay）
+### 5、钉钉（Dingtalk）
+|  method  |  描述  |
+| :-------: | :-------:   |
+|  userid  |  获取userid  |
+|  accessToken  | 获取 access_token  |
+|  userInfo  | 获取用户信息  |
+|  asyncSend  | 发送工作通知  |
+
+### 6、支付宝（Alipay）
 |  method  |  描述  |
 | :-------: | :-------:   |
 |  token  |  获取小程序用户user_id及access_token  |
+|  userInfo  | 获取用户信息  |
 |  send  | 小程序发送模板消息  |
 |  qrcode  | 小程序推广码，链接地址  |
 
@@ -94,6 +107,14 @@ $bytedanceConfig = [
     'appid' => '',
     'secret' => '',
 ];
+# 钉钉小程序配置
+$dingtalkConfig = [
+    'agentid'   => '', // agentid
+    'appkey'    => '', // appkey
+    'secret'    => '', // secret
+    'robot_appkey'    => '', // robot_appkey
+    'robot_secret'    => '', // robot_secret
+];
 # 支付宝小程序配置
 $alipayConfig = [
     'app_id' => '', // 支付宝分配给开发者的应用ID
@@ -110,6 +131,7 @@ $xcx = new \fengkui\Xcx\Wechat($wechatConfig); // 微信
 $xcx = new \fengkui\Xcx\Qq($qqConfig); // QQ
 $xcx = new \fengkui\Xcx\Baidu($baiduConfig); // 百度
 $xcx = new \fengkui\Xcx\Bytedance($bytedanceConfig); // 字节跳动
+$xcx = new \fengkui\Xcx\Dingtalk($dingtalkConfig); // 钉钉
 $xcx = new \fengkui\Xcx\Alipay($alipayConfig); // 支付宝
 ```
 
@@ -162,9 +184,9 @@ class Xcx
             'secret' => '',
         ];
 
-        if (in_array($type, ['wechat', 'qq', 'baidu', 'bytedance'])) {
+        if (in_array($type, ['wechat', 'qq', 'baidu', 'bytedance', 'dingtalk', 'alipay'])) {
             $config = $type . "Config";
-            self::$config = $$config;
+            self::$config = $config;
         } else {
             die('当前类型配置不存在');
         }
@@ -185,69 +207,13 @@ class Xcx
         if (empty($data['openid']))
             die('获取数据失败');
     }
-
-    /**
-     * [decrypt 检验数据的真实性，并且获取解密后的明文]
-     */
-    public function decrypt()
-    {
-        $sessionKey = ''; // session_key 随openid一起获取到的东东
-        $encryptedData = ''; // 加密的用户数据
-        $iv = ''; // 与用户数据一同返回的初始向量
-
-        if(!$sessionKey || !$encryptedData || !$iv)
-            die('参数缺失');
-
-        $re = self::$xcx->decrypt($sessionKey, $encryptedData, $iv);
-        if (!$re)
-            die('获取数据失败');
-    }
-
-    /**
-     * [send 发送模板消息]
-     */
-    public static function send()
-    {
-        $openid = $openid; // 用户openid
-        $template_id = ''; // 模板ID
-        $data = []; // 发送消息数据格式
-        $page = 'pages/index/index'; // 进入小程序页面
-
-        $re = self::$xcx->send($openid, $template_id, $data, $page);
-        if (!$re)
-            die('获取数据失败');
-    }
-
-    /**
-     * [qrcode 获取小程序码]
-     */
-    public static function qrcode()
-    {
-        $path = 'pages/index/index'; // 进入小程序页面
-        $width = 430; // 小程序码宽度 px (默认430)
-        $type = 2; // 获取类型 1:createwxaqrcode 2:getwxacode 3:getwxacodeunlimit  (默认2)
-        $is_hyaline = true; // 是否需要透明底色 (默认true)
-
-        $re = self::$xcx->qrcode($path, $width, $type, $is_hyaline);
-        if (!$re)
-            die('获取数据失败');
-
-        // file_put_contents('qrcode.png', $re); // 直接保存文件
-
-        // 直接显示
-        $im = imagecreatefromstring($re);
-        if ($im !== false) {
-            header('Content-Type: image/png');
-            imagepng($im);
-            imagedestroy($im);
-    }
 }
 ```
 
-## 赏一杯咖啡吧
-<center class="half">
-    <img src="https://fengkui.net/uploads/images/ali.jpg" width="200px"/><img src="https://fengkui.net/uploads/images/wechat.png" width="200px"/>
-</center>
+## 一起喝可乐
+<div style="text-align:center">
+    <img src="https://fengkui.net/uploads/images/support.jpg" style="width:500px"/>
+</div>
 
 ## LICENSE
 MIT
