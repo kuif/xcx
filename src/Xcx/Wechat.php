@@ -319,7 +319,12 @@ class Wechat
         return $result;
     }
 
-    // 封装curl加密请求
+    /**
+     * [request 封装curl加密请求]
+     * @param  [type] $url [请求路径]
+     * @param  [type] $req [请求参数]
+     * @return [type]      [description]
+     */
     public static function request($url, $req)
     {
         $config = self::$config;
@@ -332,8 +337,6 @@ class Wechat
             $access_token = self::getAccessToken();
             $urls = $url . "?access_token=" . $access_token;
         }
-
-        // dump($urls);die;
 
         $nonce = rtrim(base64_encode(random_bytes(16)), '='); // 16位随机字符
         $addReq = ["_n" => $nonce, "_appid" => $config['appid'], "_timestamp" => $time]; // 添加字段

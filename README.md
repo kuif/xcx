@@ -10,7 +10,7 @@
 欢迎 Star，欢迎 PR！
 
 ## 特点
-- 丰富的扩展，支持微信、QQ、百度、字节跳动、支付宝（待完善）小程序
+- 丰富的扩展，支持微信、QQ、百度、字节跳动、钉钉、支付宝小程序
 - 符合 PSR 标准，方便的与你的框架集成
 - 文件结构清晰，每个类单独封装扩展，便于单独使用
 
@@ -32,6 +32,7 @@
 |  send  | 微信小程序发送订阅消息  |
 |  qrcode  | 获取小程序码或小程序二维码，图片 Buffer  |
 |  decrypt  | 检验数据的真实性，并且获取解密后的明文  |
+|  request  | 同城配送，封装加密请求  |
 
 ### 2、QQ（QQ）
 
@@ -214,6 +215,8 @@ class Xcx
 <div style="text-align:center">
     <img src="https://fengkui.net/uploads/images/support.jpg" style="width:500px"/>
 </div>
+
+**请备注一起喝可乐，以便感谢支持**
 
 ## LICENSE
 MIT
