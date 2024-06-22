@@ -213,7 +213,7 @@ class Xcx
 
 ## 一起喝可乐
 <div style="text-align:center">
-    <img src="https://fengkui.net/uploads/images/support.jpg" style="width:500px"/>
+    <img src="https://raw.githubusercontent.com/kuif/common/master/images/support.jpg" style="width:500px"/>
 </div>
 
 **请备注一起喝可乐，以便感谢支持**
