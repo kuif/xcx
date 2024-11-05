@@ -230,7 +230,7 @@ class Wechat
             $postUrl = self::$wxaUrl . '/getwxacodeunlimit' . "?access_token=" . $access_token;
             unset($params['path']);
             $page = explode('?', $path);
-            $params['page'] = isset($page[0]) ? $page[0] : $path; // 扫码进入的小程序页面路径
+            $params['page'] = isset($page[0]) ? ltrim($page[0], '/') : ltrim($path, '/'); // 扫码进入的小程序页面路径
             $params['scene'] = isset($page[1]) ? $page[1] : '1=1'; // 扫码进入的小程序携带参数
 
             $params['auto_color'] = false; // 自动配置线条颜色
