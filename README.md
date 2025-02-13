@@ -25,7 +25,7 @@
 ### 1、微信（Wechat）
 
 |  method  |  描述  |
-| :-------: | :-------:   |
+|  :------:  |  :------:  |
 |  openid  |  获取小程序 openid  |
 |  userPhone  |  获取用户手机号  |
 |  accessToken  |  获取 access_token  |
@@ -37,7 +37,7 @@
 ### 2、QQ（QQ）
 
 |  method  |  描述  |
-| :-------: | :-------:   |
+|  :------:  |  :------:  |
 |  openid  |  获取小程序 openid  |
 |  accessToken  |  获取 access_token  |
 |  send  | 小程序发送订阅消息  |
@@ -47,7 +47,7 @@
 ### 3、百度（Baidu）
 
 |  method  |  描述  |
-| :-------: | :-------:   |
+|  :------:  |  :------:  |
 |  openid  |  获取小程序 openid  |
 |  accessToken  |  获取 access_token  |
 |  send  | 小程序发送订阅消息  |
@@ -57,7 +57,7 @@
 ### 4、字节跳动（Bytedance）
 
 |  method  |  描述  |
-| :-------: | :-------:   |
+|  :------:  |  :------:  |
 |  openid  |  获取小程序 openid  |
 |  accessToken  |  获取 access_token  |
 |  send  | 小程序发送订阅消息  |
@@ -66,7 +66,7 @@
 
 ### 5、钉钉（Dingtalk）
 |  method  |  描述  |
-| :-------: | :-------:   |
+|  :------:  |  :------:  |
 |  userid  |  获取userid  |
 |  accessToken  | 获取 access_token  |
 |  userInfo  | 获取用户信息  |
@@ -74,7 +74,7 @@
 
 ### 6、支付宝（Alipay）
 |  method  |  描述  |
-| :-------: | :-------:   |
+|  :------:  |  :------:  |
 |  token  |  获取小程序用户user_id及access_token  |
 |  userInfo  | 获取用户信息  |
 |  send  | 小程序发送模板消息  |
